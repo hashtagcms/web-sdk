@@ -66,6 +66,18 @@ A helper class to manage CMS configuration.
 - `getValue(key, defaultVal)`: Safely retrieve configuration values.
 - `getMedia(path)`: Get the full CDN/Server path for a media asset.
 
+## 🧪 Testing
+
+This project uses **Jest** for unit testing.
+
+```bash
+# Run tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
 ## 📄 License
 
 [MIT](LICENSE) © HashtagCMS
