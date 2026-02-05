@@ -9,19 +9,32 @@ The `@hashtagcms/web-sdk` is designed as a lightweight, framework-agnostic colle
 ├── src/
 │   ├── bootstrap.js       # Global initialization (Axios, CSRF)
 │   ├── index.js           # Main entry point (Exports)
-│   ├── components/        # UI-related logic
-│   │   └── subscribe.js   # Configuration form handler
-│   ├── helpers/           # Shared helpers
-│   │   └── common.js      # AppConfig and utilities
+│   ├── components/        # Frontend components
+│   │   └── newsletter.js  # Form handler (Newsletter/FormSubmitter)
+│   ├── helpers/           # Core helpers
+│   │   ├── common.js      # AppConfig and utilities
+│   │   ├── forms.js       # FormValidator logic
+│   │   └── google-analytics.js # GA tracking helper
 │   └── utils/             # General utilities
-│       └── analytics.js   # Tracking logic
+│       └── analytics.js   # HashtagCMS tracking logic
+├── dist/                  # Compiled builds (CJS, ESM, UMD)
+├── index.d.ts             # TypeScript definitions
 ├── package.json
 └── README.md
 ```
 
 ## 🏗️ Design Principles
 
-1. **Framework Agnostic**: No dependency on React, Vue, or Angular. Uses vanilla JavaScript to ensure compatibility with any frontend environment (Blade templates, Thymeleaf, etc.).
-2. **Minimal Dependencies**: Keeps the bundle size small. Currently only depends on `axios` for HTTP requests.
+1. **Framework Agnostic**: No dependency on React, Vue, or Angular. Uses vanilla JavaScript to ensure compatibility with any frontend environment (Blade templates, Thymeleaf, Java/Spring, etc.).
+2. **Standardized Communication**: Uses Axios with pre-configured CSRF protection to handle all CMS API interactions.
 3. **Singleton Compatibility**: Designed to be initialized once per page load to manage global state like configuration and tracking.
-4. **Data-Attr Driven**: Components are designed to find their target elements using HTML5 `data-` attributes, reducing the need for explicit DOM passing in most cases.
+4. **Build Flexibility**: Distributed in multiple formats to support modern bundlers and traditional browser `<script>` tags.
+
+## 📦 Build Formats
+
+The SDK is distributed in three formats:
+
+- **ESM (dist/index.esm.js)**: For modern bundlers like Vite, Webpack, or Rollup.
+- **CommonJS (dist/index.js)**: For Node.js environments.
+- **UMD (dist/index.umd.js)**: For the browser via CDN. Exposes the global `HashtagCms` object.
+

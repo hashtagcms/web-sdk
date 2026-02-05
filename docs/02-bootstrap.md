@@ -14,19 +14,25 @@ When you import the SDK, it automatically performs several actions:
    - Sets the `X-CSRF-TOKEN` header for all Axios requests.
    - Sets the `Authorization: Bearer <token>` header for API compatibility.
 
-## 🚀 Manual Usage
-
-In most cases, you don't need to call bootstrap manually. It is executed as a side-effect when you import the main SDK index or components.
+In most cases, you don't need to call bootstrap manually. It is executed automatically when you import the SDK or include it via a script tag.
 
 ```javascript
 // This will trigger bootstrap.js
-import { Subscribe } from '@hashtagcms/web-sdk';
+import { FormSubmitter } from '@hashtagcms/web-sdk';
+```
+
+## 🌍 UMD Bootstrap
+
+When using the SDK via CDN, the bootstrap logic runs as soon as the library is loaded. The global `HashtagCms` object is made available, and `window.axios` is pre-configured with your site's CSRF token.
+
+```html
+<script src="https://unpkg.com/@hashtagcms/web-sdk@latest/dist/index.umd.js"></script>
+<script>
+    // Axios is already pre-configured here
+    window.axios.get('/api/any-endpoint').then(res => console.log(res.data));
+</script>
 ```
 
 ## 🌐 Global Axios
 
-The SDK exposes `axios` to the global `window` object for convenience in legacy scripts or simple inline templates:
-
-```javascript
-window.axios.get('/api/endpoint').then(...);
-```
+The SDK exposes `axios` to the global `window` object for convenience in legacy scripts or simple inline templates. It is fully pre-configured to handle HashtagCMS security requirements (CSRF/Bearer tokens) as long as the meta tag is present.

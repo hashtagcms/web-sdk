@@ -1,32 +1,55 @@
 # Theme Integration Guide
 
-The Web SDK isdesigned to be the functional core for any HashtagCMS theme, regardless of the rendering engine.
+The Web SDK is designed to be the functional core for any HashtagCMS theme, regardless of the rendering engine.
 
-## 🐘 PHP/Blade Integration (`@hashtagcms/web-ui-kit`)
+## 📦 Integration Methods
 
-In a Laravel environment, themes typically use standard bundlers like Webpack or Vite. 
+### 1. NPM / Module Bundler (Vite, Webpack)
 
-1. Install the SDK: `npm install @hashtagcms/web-sdk`
-2. Import in your `app.js`:
+Recommended for modern frontend workflows.
+
+```bash
+npm install @hashtagcms/web-sdk
+```
+
 ```javascript
-import { Subscribe, Analytics, AppConfig } from '@hashtagcms/web-sdk';
+import { FormSubmitter, Analytics, AppConfig } from '@hashtagcms/web-sdk';
 
+// Initialize and attach to window if needed for global access
 window.HashtagCms = {
-    Subscribe: new Subscribe(),
-    Analytics: new Analytics(),
-    AppConfig: new AppConfig(window.cmsData)
+    form: new FormSubmitter(),
+    analytics: new Analytics(),
+    config: new AppConfig(window.HashtagCms.configData)
 };
 ```
 
-## ☕ Java/Thymeleaf Integration (`@hashtagcms/theme-java`)
+### 2. CDN / Script Tag (UMD)
 
-In the Java ecosystem, the SDK can be integrated via NPM (if using a modern JS build pipeline) or by including the bundled distribution in your templates.
+The easiest way to integrate with traditional server-side rendering (PHP/Blade, Java/Thymeleaf, etc.).
 
-1. Ensure the `csrf-token` meta tag is populated by the Java backend.
-2. Initialize the SDK in your main template:
+```html
+<script src="https://unpkg.com/@hashtagcms/web-sdk@latest/dist/index.umd.js"></script>
+<script>
+    // Access via the global HashtagCms object
+    const analytics = new HashtagCms.Analytics();
+    const config = new HashtagCms.AppConfig(window.HashtagCms.configData);
+</script>
+```
+
+## 🐘 PHP/Blade Integration
+
+Ensure the CSRF meta tag is present in your base layout:
+
+```html
+<meta name="csrf-token" content="{{ csrf_token() }}">
+```
+
+## ☕ Java/Thymeleaf Integration
+
+Ensure the `csrf-token` meta tag is populated by your Java backend. Initialize your configuration from the server-side model:
+
 ```html
 <script th:inline="javascript">
-    /* Initialize config from server-side model */
     const config = new HashtagCms.AppConfig([[${cmsConfig}]]);
 </script>
 ```

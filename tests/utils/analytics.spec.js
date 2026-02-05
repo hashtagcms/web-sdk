@@ -22,13 +22,14 @@ describe('Analytics Utility', () => {
         require('axios').post.mockClear();
     });
 
-    it('initializes and submits data', () => {
-        const spySubmit = jest.spyOn(analytics, 'submit');
-        const data = { page: 'home', user: 'guest' };
+    it('publishes data via axios', async () => {
+        const data = { event: 'test', value: 123 };
+        require('axios').post.mockResolvedValue({ data: { success: true } });
 
-        analytics.init(data);
+        const result = await analytics.publish(data);
 
-        expect(spySubmit).toHaveBeenCalledWith('post', '/analytics/publish', data);
+        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', data);
+        expect(result).toEqual({ success: true });
     });
 
     it('submits data via axios', async () => {
@@ -54,13 +55,109 @@ describe('Analytics Utility', () => {
         }
     });
 
-    it('tracks event view (legacy GA)', () => {
+    it('tracks CMS page view with valid data', async () => {
+        const data = { categoryId: 2, pageId: 123 };
+        require('axios').post.mockResolvedValue({ data: { success: true } });
+
+        const result = await analytics.trackCmsPage(data);
+
+        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { ...data, event: 'category_page_view' });
+        expect(result).toEqual({ success: true });
+    });
+
+    it('tracks CMS page view without pageId', async () => {
+        const data = { categoryId: 8 }; // Contact page
+        require('axios').post.mockResolvedValue({ data: { success: true } });
+
+        const result = await analytics.trackCmsPage(data);
+
+        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { ...data, event: 'category_page_view' });
+        expect(result).toEqual({ success: true });
+    });
+
+    it('normalizes pageId < 1 to null in trackCmsPage', async () => {
+        const data = { categoryId: 8, pageId: -1 }; 
+        require('axios').post.mockResolvedValue({ data: { success: true } });
+
+        const result = await analytics.trackCmsPage(data);
+
+        // Should normalize pageId to null
+        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { categoryId: 8, pageId: null, event: 'category_page_view' });
+        expect(result).toEqual({ success: true });
+    });
+
+    it('normalizes pageId = 0 to null in trackCmsPage', async () => {
+        const data = { categoryId: 8, pageId: 0 };
+        require('axios').post.mockResolvedValue({ data: { success: true } });
+
+        const result = await analytics.trackCmsPage(data);
+
+        // Should normalize pageId to null
+        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { categoryId: 8, pageId: null, event: 'category_page_view' });
+        expect(result).toEqual({ success: true });
+    });
+
+    it('keeps valid pageId >= 1 in trackCmsPage', async () => {
+        const data = { categoryId: 8, pageId: 123 };
+        require('axios').post.mockResolvedValue({ data: { success: true } });
+
+        const result = await analytics.trackCmsPage(data);
+
+        // Should keep valid pageId
+        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { categoryId: 8, pageId: 123, event: 'category_page_view' });
+        expect(result).toEqual({ success: true });
+    });
+
+    it('throws error when categoryId is missing in trackCmsPage', async () => {
+        const data = { pageId: 123 };
+
+        try {
+            await analytics.trackCmsPage(data);
+            fail('Should have thrown an error');
+        } catch (error) {
+            expect(error.message).toBe('trackCmsPage: categoryId is required');
+        }
+    });
+
+    it('throws error when categoryId is not an integer in trackCmsPage', async () => {
+        const data = { categoryId: '2', pageId: 123 };
+
+        try {
+            await analytics.trackCmsPage(data);
+            fail('Should have thrown an error');
+        } catch (error) {
+            expect(error.message).toBe('trackCmsPage: categoryId must be an integer');
+        }
+    });
+
+    it('throws error when pageId is not an integer in trackCmsPage', async () => {
+        const data = { categoryId: 2, pageId: '123' };
+
+        try {
+            await analytics.trackCmsPage(data);
+            fail('Should have thrown an error');
+        } catch (error) {
+            expect(error.message).toBe('trackCmsPage: pageId must be an integer');
+        }
+    });
+
+    it('master trackPageView calls google.trackPageView', () => {
+        const url = '/master-page';
+        const cb = jest.fn();
+        const spy = jest.spyOn(analytics.google, 'trackPageView');
+
+        analytics.trackPageView(url, cb);
+
+        expect(spy).toHaveBeenCalledWith(url, cb);
+    });
+
+    it('tracks event view with Google Analytics helper', () => {
         const category = 'Button';
         const action = 'Click';
         const value = 'SignUp';
         const cb = jest.fn();
 
-        analytics.trackEventView(category, action, value, cb);
+        analytics.google.trackEventView(category, action, value, cb);
 
         // Check _gaq
         expect(global._gaq).toContainEqual(['_trackEvent', category, action, value]);
@@ -77,11 +174,11 @@ describe('Analytics Utility', () => {
         expect(cb).toHaveBeenCalled();
     });
 
-    it('tracks page view (legacy GA)', () => {
+    it('tracks page view with Google Analytics helper', () => {
         const page = '/about-us';
         const cb = jest.fn();
 
-        analytics.trackPageView(page, cb);
+        analytics.google.trackPageView(page, cb);
 
         // Check _gaq
         expect(global._gaq).toContainEqual(['_trackPageview', page]);

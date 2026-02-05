@@ -1,11 +1,20 @@
 import axios from "axios";
+
+// Configure axios defaults
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-let token = document.head.querySelector('meta[name="csrf-token"]');
+
+// Setup CSRF token
+const token = document.head.querySelector('meta[name="csrf-token"]');
 if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-    axios.defaults.headers.common['Authorization'] = 'Bearer '+token.content;
     axios.defaults.withCredentials = true;
 } else {
-    // console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
+    console.warn('HashtagCMS: CSRF token not found. Add <meta name="csrf-token" content="..."> to your HTML head.');
 }
-window.axios = axios;
+
+// Only expose axios globally if not already defined
+if (typeof window !== 'undefined' && !window.axios) {
+    window.axios = axios;
+}
+
+export default axios;
