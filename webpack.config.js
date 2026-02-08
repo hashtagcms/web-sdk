@@ -28,7 +28,6 @@ module.exports = [
                 type: 'umd',
             },
             globalObject: 'this',
-            clean: true,
         },
     },
     // CommonJS Build

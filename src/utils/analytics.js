@@ -12,9 +12,10 @@ export default class Analytics {
      * @param {boolean} options.enableGoogleAnalytics - Enable Google Analytics integration (default: true)
      * @param {boolean} options.enableBeacon - Use sendBeacon API (default: true)
      */
+    
     constructor(options = {}) {
         this.options = {
-            publishUrl: options.publishUrl || '/analytics/publish',
+            publishUrl: options.publishUrl || '/api/hashtagcms/public/kpi/v1/publish',
             onPublish: options.onPublish || null,
             onError: options.onError || null,
             onPageView: options.onPageView || null,
@@ -49,7 +50,7 @@ export default class Analytics {
                 const sent = navigator.sendBeacon(url, blob);
                 
                 if (sent) {
-                    console.log('Analytics: sendBeacon sent successfully');
+                    //console.log('Analytics: sendBeacon sent successfully');
                     
                     if (this.options.onPublish) {
                         this.options.onPublish(data, null, { beaconSent: true });
@@ -124,7 +125,7 @@ export default class Analytics {
     }
 
     /**
-     * Track a CMS-specific category page view for the HashtagCMS server
+     * Track a CMS-specific category page view for the HashtagCms server
      * @param {Object} data - Page view data
      * @param {number} data.categoryId - Category ID (required)
      * @param {number} [data.pageId] - Page ID (optional, values < 1 are treated as null)
@@ -176,7 +177,7 @@ export default class Analytics {
         if (normalizedData.pageId !== undefined && normalizedData.pageId !== null && normalizedData.pageId < 1) {
             normalizedData.pageId = null;
         }
-        // add fixed event type for HashtagCMS server
+        // add fixed event type for HashtagCms server
         normalizedData.event = 'category_page_view';
 
         return this.publish(normalizedData, callback);

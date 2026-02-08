@@ -1,13 +1,13 @@
 import axios from '../bootstrap';
 import FormValidator from '../helpers/forms';
 
-export default class Newsletter {
+export default class Contact {
     /**
-     * Create a Newsletter instance
+     * Create a Contact instance
      * @param {Object} options - Configuration options
      * @param {string|HTMLElement} options.form - Form element or selector
      * @param {string|HTMLElement} options.messageHolder - Message holder element or selector (optional)
-     * @param {string} options.submitUrl - URL to submit the form data (default: '/common/newsletter')
+     * @param {string} options.submitUrl - URL to submit the form data (default: '/common/contact')
      * @param {Function} options.onSuccess - Callback after successful submission (optional)
      * @param {Function} options.onError - Callback after error (optional)
      * @param {Object} options.validatorOptions - FormValidator options (optional)
@@ -22,7 +22,7 @@ export default class Newsletter {
         // Get form element
         this.form = this._getElement(options.form);
         if (!this.form) {
-            throw new Error('Newsletter: Form element not found');
+            throw new Error('Contact: Form element not found');
         }
 
         // Get message holder element (optional)
@@ -37,8 +37,10 @@ export default class Newsletter {
         }
 
         // Configuration
-        this.submitUrl = options.submitUrl || '/common/newsletter';
+        this.submitUrl = options.submitUrl || '/common/contact';
         this.onSuccess = options.onSuccess || null;
+        this.onError = options.onError || null;
+
         this.onError = options.onError || null;
 
         // Initialize validator
@@ -63,29 +65,19 @@ export default class Newsletter {
     _initLegacyMode() {
         this.isLegacyMode = true;
         
-        // Try to find newsletter form first, then subscribe form
-        let formSelector = "form[data-form='newsletter-form']";
+        let formSelector = "form[data-form='contact-form']";
         this.form = document.querySelector(formSelector);
         
         if (!this.form) {
-            formSelector = "form[data-form='subscribe-form']";
-            this.form = document.querySelector(formSelector);
-        }
-
-        if (!this.form) {
-            console.warn('Newsletter: No form found in legacy mode');
+            console.warn('Contact: No form found in legacy mode');
             return;
         }
 
-        // Determine which selectors to use based on found form
-        const isNewsletter = formSelector.includes('newsletter');
-        const prefix = isNewsletter ? 'newsletter' : 'subscribe';
-
-        this.messageHolder = document.querySelector(`div[data-message-holder='${prefix}-message-holder']`);
-        this.messageElement = document.querySelector(`span[data-class='${prefix}-message']`);
-        this.closeElement = document.querySelector(`span[data-class='${prefix}-close']`);
+        this.messageHolder = document.querySelector("div[data-message-holder='contact-message-holder']");
+        this.messageElement = document.querySelector("span[data-class='contact-message']");
+        this.closeElement = document.querySelector("span[data-class='contact-close']");
         
-        this.submitUrl = '/common/newsletter';
+        this.submitUrl = '/common/contact';
         this.onSuccess = null;
         this.onError = null;
 
@@ -136,7 +128,7 @@ export default class Newsletter {
     }
 
     /**
-     * Submit the newsletter form
+     * Submit the contact form
      * @returns {Promise|boolean}
      */
     submit() {
@@ -186,8 +178,7 @@ export default class Newsletter {
      * @private
      */
     _handleSuccess(data) {
-        
-        this.showMessage(data.message || 'Successfully subscribed!', 'success');
+        this.showMessage(data.message || 'Information have been saved successfully.', 'success');
         this.show();
         
         // Clear form
@@ -211,12 +202,11 @@ export default class Newsletter {
      * @private
      */
     _handleError(data) {
-        
         let errorMsg = 'There was an error. Please try again.';
         
         if (data.message) {
-            if (typeof data.message === 'object' && data.message.email && data.message.email[0]) {
-                errorMsg = data.message.email[0];
+            if (typeof data.message === 'object') {
+                errorMsg = Object.values(data.message).flat().join(', ');
             } else if (typeof data.message === 'string') {
                 errorMsg = data.message;
             }
@@ -282,18 +272,10 @@ export default class Newsletter {
     }
 
     /**
-     * Programmatically trigger newsletter submission
+     * Programmatically trigger contact submission
      * @returns {Promise|boolean}
      */
-    newsletterNow() {
-        return this.submit();
-    }
-
-    /**
-     * Alias for submit/newsletterNow
-     * @deprecated Use submit() or newsletterNow() instead
-     */
-    subscribeNow() {
+    contactNow() {
         return this.submit();
     }
 }

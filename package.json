@@ -1,6 +1,6 @@
 {
   "name": "@hashtagcms/web-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Core JavaScript SDK for HashtagCMS - Form validation, analytics, and utilities",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
