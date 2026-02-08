@@ -3,7 +3,12 @@ import axios from 'axios';
 
 jest.mock('axios', () => ({
     post: jest.fn(() => Promise.resolve({ data: {} })),
-    get: jest.fn(() => Promise.resolve({ data: {} }))
+    get: jest.fn(() => Promise.resolve({ data: {} })),
+    defaults: {
+        headers: {
+            common: {}
+        }
+    }
 }));
 
 describe('Analytics Utility', () => {
@@ -28,12 +33,12 @@ describe('Analytics Utility', () => {
 
         const result = await analytics.publish(data);
 
-        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', data);
+        expect(require('axios').post).toHaveBeenCalledWith('/api/hashtagcms/public/kpi/v1/publish', data);
         expect(result).toEqual({ success: true });
     });
 
     it('submits data via axios', async () => {
-        const url = '/analytics/publish';
+        const url = '/api/hashtagcms/public/kpi/v1/publish';
         const data = { test: 'data' };
         require('axios').post.mockResolvedValue({ data: { success: true } });
 
@@ -44,7 +49,7 @@ describe('Analytics Utility', () => {
     });
     
     it('handles axios errors in submit', async () => {
-        const url = '/analytics/publish';
+        const url = '/api/hashtagcms/public/kpi/v1/publish';
         const data = { test: 'data' };
         require('axios').post.mockRejectedValue({ response: { data: { error: 'failed' } } });
 
@@ -61,7 +66,7 @@ describe('Analytics Utility', () => {
 
         const result = await analytics.trackCmsPage(data);
 
-        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { ...data, event: 'category_page_view' });
+        expect(require('axios').post).toHaveBeenCalledWith('/api/hashtagcms/public/kpi/v1/publish', { ...data, event: 'category_page_view' });
         expect(result).toEqual({ success: true });
     });
 
@@ -71,7 +76,7 @@ describe('Analytics Utility', () => {
 
         const result = await analytics.trackCmsPage(data);
 
-        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { ...data, event: 'category_page_view' });
+        expect(require('axios').post).toHaveBeenCalledWith('/api/hashtagcms/public/kpi/v1/publish', { ...data, event: 'category_page_view' });
         expect(result).toEqual({ success: true });
     });
 
@@ -82,7 +87,7 @@ describe('Analytics Utility', () => {
         const result = await analytics.trackCmsPage(data);
 
         // Should normalize pageId to null
-        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { categoryId: 8, pageId: null, event: 'category_page_view' });
+        expect(require('axios').post).toHaveBeenCalledWith('/api/hashtagcms/public/kpi/v1/publish', { categoryId: 8, pageId: null, event: 'category_page_view' });
         expect(result).toEqual({ success: true });
     });
 
@@ -93,7 +98,7 @@ describe('Analytics Utility', () => {
         const result = await analytics.trackCmsPage(data);
 
         // Should normalize pageId to null
-        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { categoryId: 8, pageId: null, event: 'category_page_view' });
+        expect(require('axios').post).toHaveBeenCalledWith('/api/hashtagcms/public/kpi/v1/publish', { categoryId: 8, pageId: null, event: 'category_page_view' });
         expect(result).toEqual({ success: true });
     });
 
@@ -104,7 +109,7 @@ describe('Analytics Utility', () => {
         const result = await analytics.trackCmsPage(data);
 
         // Should keep valid pageId
-        expect(require('axios').post).toHaveBeenCalledWith('/analytics/publish', { categoryId: 8, pageId: 123, event: 'category_page_view' });
+        expect(require('axios').post).toHaveBeenCalledWith('/api/hashtagcms/public/kpi/v1/publish', { categoryId: 8, pageId: 123, event: 'category_page_view' });
         expect(result).toEqual({ success: true });
     });
 

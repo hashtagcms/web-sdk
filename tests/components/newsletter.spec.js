@@ -2,7 +2,13 @@ import Newsletter from '../../src/components/newsletter';
 import axios from 'axios';
 
 jest.mock('axios', () => ({
-    post: jest.fn()
+    get: jest.fn(),
+    post: jest.fn(),
+    defaults: {
+        headers: {
+            common: {}
+        }
+    }
 }));
 
 describe('Newsletter Component', () => {
